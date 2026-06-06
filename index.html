@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>青程科创 | 面向青少年的项目式科创营</title>
+  <meta name="description" content="青程科创提供 AI、机器人、水火箭、船舶工程、个人网页等项目式科创营，覆盖课程研发、营期交付、成果展示、工具平台与社群运营。">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="cursor-glow" aria-hidden="true"></div>
+  <header class="site-header">
+    <a class="brand" href="#top" aria-label="青程科创首页">
+      <span class="brand-mark">QC</span>
+      <span>
+        <strong>青程科创</strong>
+        <small>Project-based STEAM Camp</small>
+      </span>
+    </a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+    <nav id="site-nav" class="site-nav">
+      <a href="#belief">理念</a>
+      <a href="#programs">项目</a>
+      <a href="#open-camp">开放营期</a>
+      <a href="#works">成果</a>
+      <a href="#tools">工具</a>
+      <a href="#join">咨询</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-bg" role="img" aria-label="山脉航拍背景，象征探索路线"></div>
+      <div class="hero-shade"></div>
+      <div class="hero-content reveal">
+        <p class="eyebrow">AI + Engineering + Robotics + Web</p>
+        <h1 id="hero-title">青程科创</h1>
+        <p class="hero-copy">从真实问题走向真实创造。我们把工程项目做成孩子能动手完成、团队能稳定交付、家长和学校能清楚看见成长证据的科创营。</p>
+        <div class="hero-actions">
+          <a class="button primary magnetic" href="#join">提交营期需求 <span aria-hidden="true">→</span></a>
+          <a class="button secondary magnetic" href="#open-camp">查看开放营期</a>
+        </div>
+        <div class="hero-metrics" aria-label="项目速览">
+          <div><strong data-count="4">4</strong><span>核心课程线</span></div>
+          <div><strong data-count="56">56</strong><span>最长营期学时</span></div>
+          <div><strong>SOP</strong><span>可复制交付资料包</span></div>
+        </div>
+      </div>
+      <a class="scroll-cue" href="#belief" aria-label="继续浏览">
+        <span></span>
+      </a>
+    </section>
+
+    <section id="belief" class="intro-band">
+      <div class="section-inner intro-grid">
+        <div class="reveal">
+          <p class="section-kicker">Why Qingcheng</p>
+          <h2>不是参观式科普，而是一次从想法到作品的完整经历。</h2>
+        </div>
+        <div class="intro-copy reveal">
+          <p>青程科创参考“教育品牌 + 项目招生系统 + 学员作品展示 + 工具平台 + 内容运营阵地”的闭环，把官网做成真正能转化、能沉淀、能运营的工作台。</p>
+          <div class="belief-pills">
+            <span>真实任务</span>
+            <span>工程实践</span>
+            <span>AI 协同</span>
+            <span>成果证据</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section method-section">
+      <div class="section-inner">
+        <div class="section-head reveal">
+          <div>
+            <p class="section-kicker">Method</p>
+            <h2>青程 CRAFT 模型</h2>
+          </div>
+          <p class="section-note">借鉴项目制学习和工程设计流程，把课程拆成可讲、可做、可评、可传播的闭环。</p>
+        </div>
+        <div class="method-grid">
+          <article class="method-card reveal">
+            <span>C</span>
+            <h3>Challenge</h3>
+            <p>从真实挑战开始：让船浮起来、让火箭飞起来、让机器人动起来。</p>
+          </article>
+          <article class="method-card reveal">
+            <span>R</span>
+            <h3>Research</h3>
+            <p>用观察、实验和 AI 工具形成假设，不把知识停留在概念层。</p>
+          </article>
+          <article class="method-card reveal">
+            <span>A</span>
+            <h3>Assembly</h3>
+            <p>完成 CAD、3D 打印、电子控制、网页表达等可见成果。</p>
+          </article>
+          <article class="method-card reveal">
+            <span>F</span>
+            <h3>Feedback</h3>
+            <p>通过数据、同伴互评、导师观察和现场测试持续迭代。</p>
+          </article>
+          <article class="method-card reveal">
+            <span>T</span>
+            <h3>Tell</h3>
+            <p>公开展示、答辩、作品墙和成长档案，把成果讲清楚。</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="programs" class="section">
+      <div class="section-inner">
+        <div class="section-head reveal">
+          <div>
+            <p class="section-kicker">Programs</p>
+            <h2>营期项目</h2>
+          </div>
+          <div class="segmented" role="tablist" aria-label="课程筛选">
+            <button class="segment is-active" type="button" data-filter="all">全部</button>
+            <button class="segment" type="button" data-filter="ai">AI</button>
+            <button class="segment" type="button" data-filter="engineering">工程</button>
+            <button class="segment" type="button" data-filter="web">网页</button>
+          </div>
+        </div>
+
+        <div class="program-grid">
+          <article class="program-card reveal" data-category="ai engineering">
+            <img src="assets/robots-web.jpg" alt="学生营期制作的仿生机器人作品">
+            <div class="program-body">
+              <span class="tag">AI 仿生机器人</span>
+              <h3>从机械结构到智能控制</h3>
+              <p>围绕蜘蛛机器人、传感器、控制逻辑和 AI 认知展开，学生完成可演示的机器人作品和展示讲解。</p>
+              <ul>
+                <li>适合：小学高年级至初中</li>
+                <li>产出：机器人调试记录、队徽、展示视频</li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="program-card reveal" data-category="engineering">
+            <img src="assets/rocket-smoke-close.gif" alt="水火箭发射产生彩色烟雾效果">
+            <div class="program-body">
+              <span class="tag">二级水火箭半日营</span>
+              <h3>模块化搭建与发射挑战</h3>
+              <p>从预制套件、发射台、安全线、倒计时音效到高度数据，形成强仪式感的工程挑战。</p>
+              <ul>
+                <li>适合：小学 3-6 年级至初中</li>
+                <li>产出：发射成绩、团队排名、合影记录</li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="program-card reveal" data-category="engineering ai">
+            <div class="program-visual boat-visual">
+              <span>Float the knowledge</span>
+            </div>
+            <div class="program-body">
+              <span class="tag">让知识浮起来</span>
+              <h3>七天工程创造营：造一艘船</h3>
+              <p>面向高中生，从浮力、稳定性、AI 协作、CAD、3D 打印到测试迭代，完成智能载重船。</p>
+              <ul>
+                <li>适合：高一至高三</li>
+                <li>产出：实体船、CAD 文件、工程日志、答辩报告</li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="program-card reveal" data-category="web ai">
+            <img src="assets/design-class-web.jpg" alt="学生正在设计个人网页和数字作品">
+            <div class="program-body">
+              <span class="tag">个人网页创作</span>
+              <h3>把自我表达做成可访问作品</h3>
+              <p>从页面结构、图片素材、小游戏嵌入到主题切换，帮助学生做出自己的展示页。</p>
+              <ul>
+                <li>适合：小学高年级至初中</li>
+                <li>产出：个人主页、小游戏入口、作品展墙</li>
+              </ul>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="open-camp" class="section camp-section">
+      <div class="section-inner camp-layout">
+        <div class="camp-poster reveal">
+          <img src="assets/rocket-camp-poster.png" alt="夏日 STEM 运动水火箭研学营海报">
+        </div>
+        <div class="camp-copy reveal">
+          <p class="section-kicker">Open Camp</p>
+          <h2>夏日 STEM + 运动研学营</h2>
+          <p>把水火箭发射、体育挑战和科学观察结合起来，适合做半日营、一日营或暑期招生主打活动。</p>
+          <div class="camp-facts">
+            <div><strong>小学3年级-初中</strong><span>适合对象</span></div>
+            <div><strong>观察 / 思考 / 实践</strong><span>活动节奏</span></div>
+            <div><strong>安全导师全程陪伴</strong><span>实施保障</span></div>
+          </div>
+          <a class="button primary magnetic" href="#join">咨询合作排期</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section feature-section">
+      <div class="section-inner feature-layout">
+        <div class="feature-copy reveal">
+          <p class="section-kicker">Experience Upgrade</p>
+          <h2>把“发射出去”升级成有声音、有画面、有数据的完整事件。</h2>
+          <p>水火箭不是看一个瓶子飞走。我们会把倒计时、彩色尾迹、风螺发声、高度记录和颁奖展示放进课程体验里，让学生记住自己的工程成果。</p>
+        </div>
+        <div class="media-stack reveal">
+          <img src="assets/rocket-smoke.gif" alt="水火箭彩色尾迹展示">
+          <video src="assets/wind-sound-demo.mp4" controls muted playsinline preload="metadata"></video>
+        </div>
+      </div>
+    </section>
+
+    <section class="section boat-section">
+      <div class="section-inner">
+        <div class="section-head reveal">
+          <div>
+            <p class="section-kicker">Flagship Course</p>
+            <h2>让知识浮起来：七天工程创造营</h2>
+          </div>
+          <a class="text-link" href="assets/boat-engineering-plan.docx">查看课程方案 DOCX <span aria-hidden="true">↗</span></a>
+        </div>
+        <div class="day-track">
+          <article class="day-card reveal"><span>Day 1</span><h3>工程师是怎样思考的？</h3><p>从 SpaceX 到一艘船，建立第一性原理和工程问题意识。</p></article>
+          <article class="day-card reveal"><span>Day 2</span><h3>为什么船能浮起来？</h3><p>从浮力到载重，建立科学模型并完成第一版设计。</p></article>
+          <article class="day-card reveal"><span>Day 3</span><h3>为什么船会翻？</h3><p>理解重心、稳定性和倾覆风险，改进船体结构。</p></article>
+          <article class="day-card reveal"><span>Day 4</span><h3>AI 工程师上线</h3><p>用 AI 辅助数据分析、代码、建模和方案诊断。</p></article>
+          <article class="day-card reveal"><span>Day 5</span><h3>从图纸到现实</h3><p>完成 CAD 建模、3D 打印和电子控制系统装配。</p></article>
+          <article class="day-card reveal"><span>Day 6</span><h3>测试与迭代</h3><p>真实下水测试，记录失败，依据数据迭代方案。</p></article>
+          <article class="day-card reveal"><span>Day 7</span><h3>工程创造者大会</h3><p>公开展示成果，完成答辩、评价和成长反思。</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="works" class="section muted">
+      <div class="section-inner">
+        <div class="section-head reveal">
+          <div>
+            <p class="section-kicker">Showcase</p>
+            <h2>成果展示</h2>
+          </div>
+          <a class="text-link" href="../2026寒假科创营/营期一/个人主页/AI 仿生机器人科创营成果展示.html">打开旧版成果页 <span aria-hidden="true">↗</span></a>
+        </div>
+
+        <div class="showcase-grid">
+          <article class="work-tile large reveal">
+            <img src="assets/web-work-web.jpg" alt="学生网页作品截图">
+            <div>
+              <span class="tag dark">网页作品</span>
+              <h3>从素材整理到页面发布</h3>
+              <p>让每个孩子拥有可以讲述项目过程的数字作品，而不是只留下课堂照片。</p>
+            </div>
+          </article>
+          <article class="work-tile reveal">
+            <img src="assets/team.png" alt="科创营团队作品头像图">
+            <div>
+              <span class="tag dark">团队创作</span>
+              <h3>队徽与展示视频</h3>
+              <p>把小组协作成果沉淀为可传播素材。</p>
+            </div>
+          </article>
+          <article class="work-tile accent reveal">
+            <div class="score-preview">
+              <span>积分看板</span>
+              <strong data-count="1280">1280</strong>
+              <small>协作、答辩、发射与作品综合记录</small>
+            </div>
+            <div>
+              <span class="tag dark">营期运营</span>
+              <h3>积分统计与现场反馈</h3>
+              <p>延续已有积分统计页面，形成更完整的营期运营闭环。</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="tools" class="section tools-section">
+      <div class="section-inner">
+        <div class="section-head reveal">
+          <div>
+            <p class="section-kicker">Tool Platform</p>
+            <h2>青程工具台</h2>
+          </div>
+          <p class="section-note">先接入已有本地工具与成果页，后续可拆成独立工具站。</p>
+        </div>
+        <div class="tool-grid">
+          <a class="tool-card reveal" href="../2026寒假科创营/营期二/积分统计/index.html"><span>Score</span><strong>积分统计</strong><small>小组竞赛与课堂表现记录</small></a>
+          <a class="tool-card reveal" href="../2026寒假科创营/营期二/个人主页/AI 仿生机器人科创营成果展示.html"><span>Gallery</span><strong>作品展墙</strong><small>学生网页、队徽、视频和游戏入口</small></a>
+          <a class="tool-card reveal" href="../2026.6二师水火箭/营期SOP.md"><span>SOP</span><strong>助教执行手册</strong><small>课前准备、分工、安全和时间线</small></a>
+          <a class="tool-card reveal" href="../2026.6二师水火箭/迭代方向.md"><span>R&D</span><strong>课程迭代库</strong><small>模块化套件、发射台和效果组件</small></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section system-section">
+      <div class="section-inner system-layout">
+        <div class="system-copy reveal">
+          <p class="section-kicker">Delivery System</p>
+          <h2>把一次好活动变成可重复交付的产品。</h2>
+          <p>课程、物料、助教培训和现场记录分层设计。每期结束后，沉淀 SOP、作品、数据和复盘，下一期直接迭代。</p>
+          <a class="button secondary dark magnetic" href="../2026.6二师水火箭/营期SOP.md">查看水火箭 SOP</a>
+        </div>
+        <div class="timeline">
+          <div class="timeline-item reveal"><span>01</span><h3>课程研发</h3><p>定义年龄段、项目难度、成果物和安全边界。</p></div>
+          <div class="timeline-item reveal"><span>02</span><h3>资料包交付</h3><p>把视频、PPT、话术、物料清单和异常处理整理成助教可执行材料。</p></div>
+          <div class="timeline-item reveal"><span>03</span><h3>现场运营</h3><p>签到、分组、积分、拍摄、发射/答辩节点统一管理。</p></div>
+          <div class="timeline-item reveal"><span>04</span><h3>成果传播</h3><p>输出作品墙、短视频素材、家长反馈和下一期招生内容。</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section news-section">
+      <div class="section-inner">
+        <div class="section-head reveal">
+          <div>
+            <p class="section-kicker">News & Trust</p>
+            <h2>动态、反馈与档案</h2>
+          </div>
+        </div>
+        <div class="news-grid">
+          <article class="news-card reveal"><span>营期记录</span><h3>AI 仿生机器人冬令营成果展示上线</h3><p>学生完成机器人调试、队徽、网页作品和小组展示。</p></article>
+          <article class="news-card reveal"><span>课程研发</span><h3>二级水火箭半日营 SOP 进入 V1.0</h3><p>模块化套件、发射台、物料清单和安全流程已成型。</p></article>
+          <article class="news-card reveal"><span>家长关心</span><h3>孩子收获的不只是一件作品</h3><p>我们记录工程日志、团队协作、公开表达和迭代过程。</p></article>
+        </div>
+        <form class="certificate-check reveal">
+          <label for="cert-code">证书 / 作品档案查询</label>
+          <div>
+            <input id="cert-code" type="text" placeholder="输入编号，例如 QC-2026-001">
+            <button class="button ghost" type="button" id="cert-check">查询</button>
+          </div>
+          <p id="cert-result" role="status">当前为前端演示，可后续接入正式数据库。</p>
+        </form>
+      </div>
+    </section>
+
+    <section class="section faq-section">
+      <div class="section-inner faq-layout">
+        <div class="reveal">
+          <p class="section-kicker">FAQ</p>
+          <h2>四方视角看课程</h2>
+          <p class="section-note">来自七日工程创造营方案的思路：分别回应学校、教师、家长和学生真正关心的问题。</p>
+        </div>
+        <div class="accordion reveal">
+          <button class="accordion-item" type="button"><span>学校：这是不是能形成校本特色？</span><strong>＋</strong></button>
+          <div class="accordion-panel"><p>可以。七日营可以转化为 16 周学期课程，也可以作为 STEM 节、科技节或研学项目的核心内容。</p></div>
+          <button class="accordion-item" type="button"><span>教师：我没有工程背景能不能带？</span><strong>＋</strong></button>
+          <div class="accordion-panel"><p>团队会提供 SOP、物料包、培训和课后复盘机制，降低对单个核心成员经验的依赖。</p></div>
+          <button class="accordion-item" type="button"><span>家长：孩子最后能带走什么？</span><strong>＋</strong></button>
+          <div class="accordion-panel"><p>除了实体作品，还会有工程日志、程序代码、数据报告、展示视频和成长档案。</p></div>
+          <button class="accordion-item" type="button"><span>学生：失败了是不是就输了？</span><strong>＋</strong></button>
+          <div class="accordion-panel"><p>不是。工程教育看的是如何根据测试数据迭代，失败本身就是课程最重要的一部分。</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="join" class="section join-section">
+      <div class="section-inner join-layout">
+        <div class="reveal">
+          <p class="section-kicker">Contact</p>
+          <h2>提交营期需求</h2>
+          <p class="join-copy">适合学校、社区、研学机构或家长团体。先收集人数、年龄段、时间和希望主题，后续可以接入飞书表格或数据库。</p>
+          <div class="need-summary" aria-live="polite">
+            <strong id="saved-count">0</strong>
+            <span>条本机咨询记录</span>
+          </div>
+        </div>
+
+        <form class="lead-form reveal" id="lead-form">
+          <label>联系人<input name="name" type="text" placeholder="例如：张老师" required></label>
+          <label>联系方式<input name="contact" type="text" placeholder="手机号 / 微信 / 邮箱" required></label>
+          <label>预计人数<input name="size" type="number" min="1" max="200" placeholder="例如：30" required></label>
+          <label>感兴趣项目<select name="program" required>
+            <option value="">请选择</option>
+            <option>AI 仿生机器人科创营</option>
+            <option>二级水火箭半日营</option>
+            <option>让知识浮起来七日工程创造营</option>
+            <option>个人网页创作营</option>
+            <option>需要共同设计新主题</option>
+          </select></label>
+          <label class="full">需求说明<textarea name="message" rows="4" placeholder="年龄段、场地、时间、预算或特殊要求"></textarea></label>
+          <div class="form-actions full">
+            <button class="button primary magnetic" type="submit">保存咨询记录 <span aria-hidden="true">＋</span></button>
+            <button class="button ghost magnetic" type="button" id="export-leads">导出 JSON</button>
+          </div>
+          <p class="form-status full" id="form-status" role="status"></p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="section-inner footer-inner">
+      <div>
+        <strong>青程科创</strong>
+        <p>让青少年在真实项目里理解技术、表达想法、完成作品。</p>
+      </div>
+      <a href="#top">回到顶部 ↑</a>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
