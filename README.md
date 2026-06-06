@@ -132,6 +132,35 @@
 
 当前表单数据保存到浏览器本地，可导出 JSON。后续可接入飞书多维表格、数据库或表单服务。
 
+## 项目文件结构
+
+```text
+青程科创官网/
+├── index.html              # 官网首页
+├── styles.css              # 样式、响应式布局和动画
+├── script.js               # 交互逻辑
+├── README.md               # 项目介绍
+├── GitHub部署指南.md        # GitHub Desktop 与 Pages 部署说明
+├── assets/                 # 首页直接使用的图片、GIF、视频、DOCX 素材
+└── resources/              # 首页链接到的成果页、积分页、SOP、迭代文档
+```
+
+## GitHub Pages 部署说明
+
+本项目是纯静态网站，适合直接部署到 GitHub Pages。
+
+部署时必须把 `index.html`、`styles.css`、`script.js`、`assets/`、`resources/` 一起提交到同一个 GitHub 仓库。GitHub Pages 只能访问仓库里的文件，不能访问本机电脑上官网目录外的路径。
+
+当前 `resources/` 已包含：
+
+- `showcase-ai-robotics.html`：AI 仿生机器人成果展示页
+- `scoreboard.html`：积分统计静态演示页
+- `score-data.xlsx`：积分数据文件备份
+- `water-rocket-sop.md`：水火箭营期 SOP
+- `water-rocket-iteration.md`：水火箭迭代方向
+
+注意：GitHub Pages 不能运行 Python 后端，所以积分统计页中的在线保存能力需要后续接数据库、飞书表格或其他后端服务；作为静态页面展示和手动导入 Excel 使用没有问题。
+
 ## 后续可迭代方向
 
 - 接入真实报名表单或飞书多维表格

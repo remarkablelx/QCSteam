@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>AI 仿生机器人科创营 | 成果展示 & 教程</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* --- 1. 基础设置与多主题系统 --- */
+        :root {
+            /* 默认：赛博风 (Cyber) */
+            --primary-color: #4f46e5;
+            --accent-color: #f43f5e;
+            --bg-color: #f8fafc;
+            --text-main: #1e293b;
+            --text-light: #64748b;
+            --card-radius: 20px;
+            --hero-gradient: linear-gradient(135deg, #4f46e5 0%, #0f172a 100%);
+            --font-family: "Noto Sans SC", sans-serif;
+            --shadow-style: 0 10px 30px rgba(0,0,0,0.1);
+            --hero-text-bg: rgba(0, 0, 0, 0.4);
+        }
+
+        /* 可爱风 (Cute) */
+        [data-theme="cute"] {
+            --primary-color: #f472b6; 
+            --accent-color: #fbbf24;
+            --bg-color: #fff1f2;
+            --text-main: #881337;
+            --text-light: #be123c;
+            --card-radius: 30px;
+            --hero-gradient: linear-gradient(135deg, #fbcfe8 0%, #f472b6 100%);
+            --font-family: "Comic Sans MS", "幼圆", sans-serif;
+            --shadow-style: 4px 4px 0px rgba(244, 114, 182, 0.4);
+            --hero-text-bg: rgba(255, 255, 255, 0.6);
+        }
+        [data-theme="cute"] .hero { color: #881337; }
+
+        /* 极简风 (Minimalist) */
+        [data-theme="minimal"] {
+            --primary-color: #171717; 
+            --accent-color: #525252;
+            --bg-color: #ffffff;
+            --text-main: #000000;
+            --text-light: #666666;
+            --card-radius: 0px; 
+            --hero-gradient: linear-gradient(135deg, #e5e5e5 0%, #ffffff 100%);
+            --font-family: "Courier New", Courier, monospace;
+            --shadow-style: 1px 1px 0px #000;
+            --hero-text-bg: rgba(255, 255, 255, 0.9);
+        }
+        [data-theme="minimal"] .hero { color: #000 !important; }
+
+        /* 森系风 (Nature) */
+        [data-theme="nature"] {
+            --primary-color: #059669;
+            --accent-color: #d97706;
+            --bg-color: #ecfdf5;
+            --text-main: #064e3b;
+            --text-light: #047857;
+            --card-radius: 15px;
+            --hero-gradient: linear-gradient(135deg, #6ee7b7 0%, #059669 100%);
+            --font-family: "Georgia", serif;
+            --shadow-style: 0 8px 20px rgba(5, 150, 105, 0.15);
+            --hero-text-bg: rgba(6, 78, 59, 0.4);
+        }
+
+        /* 黑客风 (Hacker) */
+        [data-theme="hacker"] {
+            --primary-color: #00ff00;
+            --accent-color: #00ff00;
+            --bg-color: #000000;
+            --text-main: #00ff00;
+            --text-light: #00cc00;
+            --card-radius: 2px;
+            --hero-gradient: #000;
+            --font-family: "Courier New", monospace;
+            --shadow-style: 0 0 10px rgba(0, 255, 0, 0.5);
+            --hero-text-bg: rgba(0, 50, 0, 0.8);
+        }
+        /* 黑客风特殊处理 */
+        [data-theme="hacker"] .squad-card, 
+        [data-theme="hacker"] .art-card,
+        [data-theme="hacker"] .game-wrapper,
+        [data-theme="hacker"] .gallery-item,
+        [data-theme="hacker"] .game-card,
+        [data-theme="hacker"] nav { background: rgba(0,0,0,0.9); border-bottom: 1px solid #00ff00; }
+        [data-theme="hacker"] .prompt-box { background: #0a0a0a; border-left: 4px solid #00ff00; }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: var(--font-family); transition: background-color 0.3s, color 0.3s, border-radius 0.3s; }
+        body { background-color: var(--bg-color); color: var(--text-main); line-height: 1.6; }
+        
+        /* 背景网格 */
+        body:not([data-theme="minimal"]):not([data-theme="hacker"]) {
+            background-image: radial-gradient(rgba(0,0,0,0.05) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        [data-theme="hacker"] body {
+            background-image: linear-gradient(0deg, transparent 24%, rgba(0, 255, 0, .05) 25%, rgba(0, 255, 0, .05) 26%, transparent 27%, transparent 74%, rgba(0, 255, 0, .05) 75%, rgba(0, 255, 0, .05) 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, rgba(0, 255, 0, .05) 25%, rgba(0, 255, 0, .05) 26%, transparent 27%, transparent 74%, rgba(0, 255, 0, .05) 75%, rgba(0, 255, 0, .05) 76%, transparent 77%, transparent);
+            background-size: 30px 30px;
+        }
+
+        a { text-decoration: none; color: inherit; }
+        ul { list-style: none; }
+
+        .container { width: 90%; max-width: 1100px; margin: 0 auto; padding: 0 15px; }
+
+        .nav-tools { display: flex; align-items: center; gap: 8px; }
+
+        /* --- 导航栏 --- */
+        nav { background-color: rgba(255, 255, 255, 0.95); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); position: fixed; width: 100%; top: 0; z-index: 1000; backdrop-filter: blur(5px); }
+        .nav-content { display: flex; justify-content: space-between; align-items: center; height: 70px; }
+        .logo-gradient {
+            font-size: 24px; font-weight: 900;
+            color: var(--primary-color);
+            display: flex; align-items: center; gap: 10px; cursor: pointer;
+        }
+        .toolbar { display: flex; gap: 10px; align-items: center; }
+
+        /* --- Hero 区域 --- */
+        .hero {
+            padding-top: 140px; padding-bottom: 80px; text-align: center;
+            background: var(--hero-gradient);
+            background-size: cover; background-position: center;
+            color: white; border-bottom-left-radius: 50px; border-bottom-right-radius: 50px;
+            position: relative; transition: background 0.5s ease;
+        }
+        .hero-text-wrapper {
+            background: var(--hero-text-bg); backdrop-filter: blur(5px); padding: 20px 40px;
+            border-radius: 20px; display: inline-block; margin-top: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .hero-avatar-container {
+            width: 160px; height: 160px; margin: 0 auto 20px; border-radius: 50%;
+            border: 6px solid rgba(255, 255, 255, 0.3); background: #fff; overflow: hidden;
+            position: relative; z-index: 5; cursor: pointer; box-shadow: var(--shadow-style);
+        }
+        .hero-avatar-container img { width: 100%; height: 100%; object-fit: cover; }
+        .drop-hint-text {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.6); color: white; padding: 5px; width: 100%; text-align: center;
+            font-size: 0.8rem; pointer-events: none; opacity: 0; transition: opacity 0.3s;
+        }
+        .hero-avatar-container:hover .drop-hint-text { opacity: 1; }
+
+        /* --- 卡片通用样式 --- */
+        .squad-card, .art-card, .game-wrapper {
+            background: white; border-radius: var(--card-radius); 
+            box-shadow: var(--shadow-style); 
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        .squad-card { padding: 30px; text-align: center; max-width: 800px; margin: 40px auto; }
+        .squad-badge-img { 
+            width: 150px; height: 150px; border-radius: 50%; margin: 0 auto 20px; 
+            background: #f1f5f9; display: flex; align-items: center; justify-content: center; 
+            overflow: hidden; border: 4px solid var(--primary-color);
+        }
+        .squad-badge-img img { width: 100%; height: 100%; object-fit: cover; }
+        .prompt-box {
+            background: #f1f5f9; padding: 15px; border-radius: 10px; text-align: left;
+            font-size: 0.9rem; color: var(--text-light); border-left: 4px solid var(--primary-color);
+            margin-top: 20px;
+        }
+
+        /* --- 魔法工坊 & 游戏 --- */
+        section { padding: 40px 0; }
+        .section-title { text-align: center; font-size: 2rem; margin-bottom: 40px; color: var(--text-main); }
+        .section-title span { border-bottom: 4px solid var(--accent-color); padding-bottom: 5px; }
+
+        .media-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .art-card { overflow: hidden; display: flex; flex-direction: column; }
+        .media-container {
+            width: 100%; height: 400px; background: #e2e8f0; display: flex;
+            align-items: center; justify-content: center; position: relative; cursor: pointer;
+        }
+        .media-container img, .media-container video { width: 100%; height: 100%; object-fit: cover; }
+        .media-placeholder { font-size: 3rem; color: #cbd5e1; pointer-events: none;}
+        .art-content { padding: 20px; flex-grow: 1; }
+
+        .game-full-row { width: 100%; }
+        .game-wrapper { padding: 20px; text-align: center; display: flex; flex-direction: column; background: var(--text-main); color: white; }
+        .game-viewport {
+            width: 100%; height: 600px; background: #0f172a; 
+            border: 2px solid #334155; border-radius: 10px; margin-top: 10px; 
+            position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center;
+        }
+        .game-iframe { width: 100%; height: 100%; border: none; display: none; }
+        #snakeCanvas { max-width: 100%; display: block; }
+        .game-library-area { margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; }
+        .game-library-title { text-align: left; font-size: 1rem; margin-bottom: 15px; color: #94a3b8; }
+        .game-list { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px; }
+        .game-uploader-card {
+            min-width: 140px; height: 140px; border: 2px dashed rgba(255,255,255,0.3); border-radius: 10px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            cursor: pointer; color: #94a3b8; transition: all 0.2s; flex-shrink: 0; background: rgba(255,255,255,0.05);
+        }
+        .game-uploader-card:hover { border-color: var(--accent-color); color: var(--accent-color); background: rgba(255,255,255,0.1); }
+        .game-card {
+            min-width: 140px; height: 140px; background: rgba(255,255,255,0.1); border-radius: 10px; padding: 10px;
+            display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+            cursor: pointer; position: relative; border: 2px solid transparent; transition: all 0.2s; flex-shrink: 0;
+        }
+        .game-card:hover { transform: translateY(-3px); background: rgba(255,255,255,0.15); }
+        .game-card.active { border-color: var(--accent-color); background: rgba(255,255,255,0.2); }
+        .game-icon { font-size: 2.5rem; color: var(--primary-color); margin-top: 15px; }
+        .game-name { font-size: 0.85rem; color: white; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .game-play-btn { font-size: 0.7rem; background: var(--primary-color); padding: 4px 10px; border-radius: 10px; margin-top: 5px; opacity: 0.8; }
+
+        /* --- 精彩成果展 --- */
+        .gallery-uploader {
+            border: 3px dashed var(--primary-color); border-radius: var(--card-radius); padding: 40px; text-align: center;
+            background: rgba(255,255,255,0.5); margin-bottom: 30px; cursor: pointer; transition: all 0.3s;
+        }
+        .gallery-uploader:hover { background: rgba(255,255,255,0.8); }
+        .gallery-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+        .gallery-item {
+            background: white; border-radius: 15px; overflow: hidden; box-shadow: var(--shadow-style); border: 1px solid #eee;
+            display: flex; flex-direction: column; transition: transform 0.2s;
+        }
+        .gallery-item:hover { transform: translateY(-5px); }
+        .gallery-media { width: 100%; height: 200px; background: #f1f5f9; position: relative; cursor: pointer; overflow: hidden; }
+        .gallery-media img, .gallery-media video { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
+        .gallery-media:hover img { transform: scale(1.05); }
+        .gallery-info { padding: 15px; }
+        .gallery-title { font-weight: bold; font-size: 1.1rem; margin-bottom: 5px; color: var(--text-main); }
+        .gallery-desc { font-size: 0.9rem; color: var(--text-light); }
+
+        /* --- 灯箱 --- */
+        .lightbox {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000;
+            justify-content: center; align-items: center; flex-direction: column;
+        }
+        .lightbox.active { display: flex; }
+        .lightbox-content { max-width: 90%; max-height: 80vh; object-fit: contain; border-radius: 5px; box-shadow: 0 0 20px rgba(255,255,255,0.2); }
+        .lightbox-close { position: absolute; top: 20px; right: 30px; color: white; font-size: 40px; cursor: pointer; transition: transform 0.2s; }
+        .lightbox-close:hover { transform: rotate(90deg) scale(1.2); color: var(--accent-color); }
+        .lightbox-caption { color: #ccc; margin-top: 15px; font-size: 1.2rem; text-align: center; }
+
+        /* --- 工具栏按钮 --- */
+        .nav-tools { display: flex; align-items: center; gap: 8px; }
+        .nav-tools input {
+            padding: 6px 12px; border-radius: 20px; border: 1px solid #e2e8f0; outline: none;
+            font-size: 0.85rem; color: var(--text-main); background: rgba(255, 255, 255, 0.8); width: 160px;
+        }
+        .btn-primary {
+            background: var(--primary-color); color: white; border: none; padding: 6px 14px; border-radius: 20px; cursor: pointer;
+            font-size: 0.85rem; display: flex; align-items: center; gap: 5px; transition: opacity 0.2s;
+        }
+        .btn-primary:hover { opacity: 0.9; }
+        .btn-accent { background: var(--accent-color); }
+        .theme-switcher select { padding: 6px; border-radius: 15px; border: 1px solid #ccc; font-size: 0.85rem; cursor: pointer; }
+        
+        footer { text-align: center; padding: 40px 20px; background: var(--text-main); color: #94a3b8; font-size: 0.9rem; margin-top: 40px; }
+
+        @media (max-width: 768px) { 
+            .media-grid { grid-template-columns: 1fr; } 
+            .nav-content { flex-direction: column; height: auto; padding: 10px; gap: 10px; }
+            .nav-tools { flex-wrap: wrap; justify-content: center; }
+            .hero-text-wrapper { padding: 15px; width: 95%; }
+        }
+    </style>
+</head>
+<body data-theme="cyber">
+
+    <nav>
+        <div class="container nav-content">
+            <div class="logo-gradient" onclick="toggleView('home')">
+                <i class="fas fa-rocket logo-icon"></i> AI 仿生机器人科创营
+            </div>
+            
+            <div class="toolbar">
+                <div class="theme-switcher">
+                    <select onchange="changeTheme(this.value)" id="themeSelect">
+                        <option value="cyber">🤖 赛博风</option>
+                        <option value="cute">🌸 可爱风</option>
+                        <option value="nature">🌿 森系风</option>
+                        <option value="minimal">🔳 极简风</option>
+                        <option value="hacker">💻 黑客风</option>
+                    </select>
+                </div>
+
+                <button class="btn-primary btn-accent" onclick="exportHTML()">
+                    <i class="fas fa-save"></i> 保存网页
+                </button>
+            </div>
+
+            <div class="nav-tools">
+                <input type="text" id="linkInput" placeholder="输入网址" />
+                <button class="btn-primary" onclick="jumpToLink()">
+                    <i class="fas fa-external-link-alt"></i> 跳转
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主页视图 -->
+    <div id="home-view">
+        <section id="hero" class="hero drop-zone" data-type="background">
+            <span class="bg-drop-hint"><i class="fas fa-image"></i> 拖拽图片更换背景</span>
+            <div class="container">
+                <div class="hero-avatar-container drop-zone" id="avatarZone" data-type="image">
+                    <span class="drop-hint-text"><i class="fas fa-upload"></i> 换头像</span>
+                    <img src="https://via.placeholder.com/150?text=Avatar" alt="头像" id="avatarImg"> 
+                </div>
+                
+                <div class="hero-text-wrapper">
+                    <h1>我是 <span contenteditable="true">小刘老师</span></h1>
+                    <p style="max-width: 600px; margin: 15px auto;">
+                        <span contenteditable="true">欢迎来到 AI 仿生机器人科创营成果展示！这里记录了我们的创意和代码魔法。</span>
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section id="squad">
+            <div class="container">
+                <h2 class="section-title"><span>我的未来战队</span></h2>
+                <div class="squad-card">
+                    <div class="squad-badge-img drop-zone" data-type="image">
+                        <span class="drop-hint-text" style="opacity:1; background:rgba(0,0,0,0.3); font-size:0.7rem;">拖入队徽</span>
+                        <img src="" alt="" style="display:none;" onerror="this.style.display='none'">
+                        <i class="fas fa-shield-alt media-placeholder" style="font-size: 3rem; color: #cbd5e1;"></i>
+                    </div>
+                    <h3 style="font-size: 1.5rem; margin-bottom: 10px;">
+                        战队：<span contenteditable="true" style="color: var(--primary-color); border-bottom: 2px dashed #cbd5e1;">赛博探险家</span>
+                    </h3>
+                    <div style="margin-bottom: 20px;">
+                        <strong>口号：</strong>
+                        <span contenteditable="true" style="font-style: italic; color: var(--accent-color);">“AI 助力，探索不息！”</span>
+                    </div>
+                    <p style="margin-bottom: 15px;"><strong>战队故事：</strong> 
+                        <span contenteditable="true">我们选择狮子做徽章，因为我们想像狮子一样勇敢。蓝色的背景代表我们要在充满科技的未来宇宙中探索！</span>
+                    </p>
+                    <div class="prompt-box">
+                        <strong>AI 咒语 (Prompt)：</strong><br>
+                        <span contenteditable="true" style="display: block; margin-top: 5px;">"设计一个队徽，卡通风格，一只戴着墨镜的狮子作为主角，蓝色科技感背景，圆形徽章，3D渲染风格。"</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="workshop">
+            <div class="container">
+                <h2 class="section-title"><span>AI 魔法工坊</span></h2>
+                
+                <div class="media-grid">
+                    <div class="art-card">
+                        <div class="media-container drop-zone" data-type="image">
+                            <i class="fas fa-image media-placeholder"></i>
+                            <img src="" style="display:none; position:absolute; top:0; left:0;">
+                            <span class="drop-hint-text" style="opacity: 1; position: absolute; bottom: 10px; font-size: 0.8rem; background: rgba(255,255,255,0.8); padding: 2px 8px; border-radius: 10px;">拖入探险照片</span>
+                        </div>
+                        <div class="art-content">
+                            <h4 contenteditable="true">探险照片</h4>
+                            <p contenteditable="true" style="color: var(--text-light); font-size: 0.9rem;">(点击此处修改) 这是我们用豆包生成的火星基地...</p>
+                        </div>
+                    </div>
+
+                    <div class="art-card">
+                        <div class="media-container drop-zone" data-type="video">
+                            <i class="fas fa-video media-placeholder"></i>
+                            <video src="" controls style="display:none; position:absolute; top:0; left:0;"></video>
+                            <span class="drop-hint-text" style="opacity: 1; position: absolute; bottom: 10px; font-size: 0.8rem; background: rgba(255,255,255,0.8); padding: 2px 8px; border-radius: 10px;">拖入生成视频</span>
+                        </div>
+                        <div class="art-content">
+                            <h4 contenteditable="true">精彩时刻</h4>
+                            <p contenteditable="true" style="color: var(--text-light); font-size: 0.9rem;">(点击此处修改) 我们的队徽动起来了！使用了豆包AI 生成...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="game-full-row">
+                    <div class="game-wrapper">
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                            <h3 style="text-align: left;"><i class="fas fa-gamepad"></i> <span contenteditable="true">我的游戏街机厅</span></h3>
+                            <button onclick="resetGameView()" style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 5px 12px; border-radius: 20px; cursor: pointer; font-size:0.8rem;">
+                                <i class="fas fa-power-off"></i> 退出游戏
+                            </button>
+                        </div>
+                        
+                        <!-- 游戏屏幕 -->
+                        <div class="game-viewport">
+                            <canvas id="snakeCanvas" width="600" height="400"></canvas>
+                            <iframe class="game-iframe" id="gameFrame" sandbox="allow-scripts allow-same-origin allow-modals"></iframe>
+                            <div id="gameStatusText" style="position: absolute; bottom: 10px; width: 100%; text-align: center; color: rgba(255,255,255,0.5); font-size: 0.8rem; pointer-events: none;">
+                                等待游戏卡带插入... (默认屏保: 贪吃蛇)
+                            </div>
+                        </div>
+
+                        <!-- 游戏库控制台 -->
+                        <div class="game-library-area">
+                            <div class="game-library-title">
+                                <i class="fas fa-layer-group"></i> 游戏库 (把 .html 文件拖入虚线框)
+                            </div>
+                            <div class="game-list" id="gameLibraryList">
+                                <div class="game-uploader-card drop-zone" data-type="game_library">
+                                    <i class="fas fa-plus-circle" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                                    <span style="font-size: 0.8rem;">添加新游戏</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="gallery">
+            <div class="container">
+                <h2 class="section-title"><span>精彩成果展</span></h2>
+                
+                <div class="gallery-uploader drop-zone" id="galleryDropZone" data-type="gallery">
+                    <i class="fas fa-images" style="font-size: 3rem; color: var(--primary-color); margin-bottom: 10px;"></i>
+                    <h3 style="color: var(--text-main);">拖入多张图片或视频</h3>
+                    <p style="color: var(--text-light);">生成展示卡片 | 点击查看大图 | 修改描述</p>
+                </div>
+
+                <div class="gallery-container" id="galleryContainer"></div>
+            </div>
+        </section>
+    </div>
+
+    <div id="lightbox" class="lightbox" onclick="closeLightbox(event)">
+        <span class="lightbox-close" onclick="closeLightbox(event, true)">&times;</span>
+        <img class="lightbox-content" id="lightboxImg" style="display:none;">
+        <video class="lightbox-content" id="lightboxVideo" controls style="display:none;"></video>
+        <h3 id="lightboxCaption" class="lightbox-caption"></h3>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>AI 仿生机器人科创营 作品展示</p>
+            <p>&copy; 2026 未来探险家 <span contenteditable="true" style="color: white; font-weight: bold; padding: 0 5px;">小刘老师</span> | Powered by AI Magic</p>
+        </div>
+    </footer>
+
+    <script>
+        /**
+         * AI 仿生机器人科创营成果展示网页
+         * 主要功能：
+         * 1. 拖拽式图片/视频上传与展示
+         * 2. 多主题切换（赛博风、可爱风、极简风、森系风、黑客风）
+         * 3. 贪吃蛇游戏屏保
+         * 4. 游戏库功能，支持拖拽HTML游戏文件
+         * 5. 图库功能，支持多图上传与灯箱预览
+         * 6. 网页导出与链接跳转功能
+         */
+        
+        // --- DOM元素缓存 --- 
+        const DOM = {
+            // 拖拽区域
+            dropZones: document.querySelectorAll('.drop-zone'),
+            
+            // 游戏相关
+            gameFrame: document.getElementById('gameFrame'),
+            snakeCanvas: document.getElementById('snakeCanvas'),
+            gameStatusText: document.getElementById('gameStatusText'),
+            gameLibraryList: document.getElementById('gameLibraryList'),
+            
+            // 灯箱相关
+            lightbox: document.getElementById('lightbox'),
+            lightboxImg: document.getElementById('lightboxImg'),
+            lightboxVideo: document.getElementById('lightboxVideo'),
+            lightboxCaption: document.getElementById('lightboxCaption'),
+            
+            // 图库相关
+            galleryContainer: document.getElementById('galleryContainer'),
+            galleryDropZone: document.getElementById('galleryDropZone'),
+            
+            // 其他
+            linkInput: document.getElementById('linkInput')
+        };
+        
+        // --- 拖拽与文件处理 ---
+        
+        // 初始化拖拽事件
+        const initDragAndDrop = () => {
+            DOM.dropZones.forEach(zone => {
+                zone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    zone.classList.add('drag-over');
+                });
+                
+                zone.addEventListener('dragleave', () => {
+                    zone.classList.remove('drag-over');
+                });
+                
+                zone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    zone.classList.remove('drag-over');
+                    
+                    const files = e.dataTransfer.files;
+                    if (files.length === 0) return;
+                    
+                    const zoneType = zone.dataset.type;
+                    if (zoneType === 'game_library') {
+                        handleGameLibraryFiles(files);
+                    } else if (zone.id === 'galleryDropZone') {
+                        handleGalleryFiles(files);
+                    } else {
+                        handleSingleFile(files[0], zone, zoneType);
+                    }
+                });
+            });
+        };
+        
+        // 处理单个文件
+        const handleSingleFile = (file, zone, type) => {
+            const reader = new FileReader();
+            const hint = zone.querySelector('.drop-hint-text');
+            
+            reader.onload = (e) => {
+                const res = e.target.result;
+                
+                if (type === 'background' && file.type.startsWith('image/')) {
+                    zone.style.backgroundImage = `url('${res}')`;
+                    zone.style.boxShadow = "inset 0 0 0 2000px rgba(0,0,0,0.4)";
+                } 
+                else if (type === 'image' && file.type.startsWith('image/')) {
+                    let img = zone.querySelector('img');
+                    if (!img) {
+                        img = document.createElement('img');
+                        img.style.width = '100%';
+                        img.style.height = '100%';
+                        img.style.objectFit = 'cover';
+                        zone.appendChild(img);
+                    }
+                    img.src = res;
+                    img.style.display = 'block';
+                    
+                    const placeholder = zone.querySelector('.media-placeholder');
+                    if (placeholder) placeholder.style.display = 'none';
+                    if (hint) hint.style.display = 'none';
+                } 
+                else if (type === 'video' && file.type.startsWith('video/')) {
+                    let video = zone.querySelector('video');
+                    let placeholder = zone.querySelector('.media-placeholder');
+                    
+                    if (!video) {
+                        video = document.createElement('video');
+                        video.controls = true;
+                        zone.appendChild(video);
+                    }
+                    
+                    video.src = res;
+                    video.style.display = 'block';
+                    if (placeholder) placeholder.style.display = 'none';
+                    video.play();
+                    if (hint) hint.style.display = 'none';
+                }
+            };
+            
+            reader.readAsDataURL(file);
+        };
+        
+        // 初始化拖拽功能
+        initDragAndDrop();
+
+        // --- 游戏库逻辑 ---
+        // 处理游戏库文件
+        const handleGameLibraryFiles = (files) => {
+            Array.from(files).forEach(file => {
+                if (!file.name.endsWith('.html')) {
+                    alert("请拖入 .html 格式的游戏文件！");
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    let htmlContent = e.target.result;
+                    // 添加localStorage polyfill
+                    const polyfillCode = `
+                    <script>
+                        (function() {
+                            try {
+                                var x = 'test'; localStorage.setItem(x, x); localStorage.removeItem(x);
+                            } catch (e) {
+                                var store = {};
+                                Object.defineProperty(window, 'localStorage', { 
+                                    value: {
+                                        getItem: function(key) { return store[key] || null; },
+                                        setItem: function(key, value) { store[key] = String(value); },
+                                        removeItem: function(key) { delete store[key]; },
+                                        clear: function() { store = {}; },
+                                        key: function(i) { return Object.keys(store)[i]; },
+                                        get length() { return Object.keys(store).length; }
+                                    }, writable: true 
+                                });
+                            }
+                        })();
+                    <\/script>`;
+                    
+                    if (htmlContent.includes('<head>')) {
+                        htmlContent = htmlContent.replace('<head>', '<head>' + polyfillCode);
+                    } else {
+                        htmlContent = polyfillCode + htmlContent;
+                    }
+                    
+                    const fixedGameUrl = "data:text/html;charset=utf-8," + encodeURIComponent(htmlContent);
+                    createGameCard(file.name, fixedGameUrl);
+                };
+                
+                reader.readAsText(file);
+            });
+        };
+        
+        // 创建游戏卡片
+        const createGameCard = (fileName, gameUrl) => {
+            const card = document.createElement('div');
+            card.className = 'game-card';
+            
+            const icons = ['fa-ghost', 'fa-gamepad', 'fa-chess-knight', 'fa-space-shuttle', 'fa-dragon', 'fa-puzzle-piece'];
+            const randomIcon = icons[Math.floor(Math.random() * icons.length)];
+            const cleanName = fileName.replace('.html', '');
+            
+            card.dataset.gameSrc = gameUrl;
+            card.addEventListener('click', (event) => {
+                if (event.target.isContentEditable) return;
+                handleGameCardClick(card);
+            });
+            
+            card.innerHTML = `
+                <i class="fas ${randomIcon} game-icon"></i>
+                <div class="game-name" contenteditable="true">${cleanName}</div>
+                <div class="game-play-btn">START</div>
+            `;
+            
+            DOM.gameLibraryList.appendChild(card);
+        };
+        
+        // 处理游戏卡片点击
+        const handleGameCardClick = (card) => {
+            const gameUrl = card.dataset.gameSrc;
+            const nameElement = card.querySelector('.game-name');
+            const name = nameElement ? nameElement.innerText : '游戏';
+            
+            if (gameUrl) {
+                loadGameIntoConsole(gameUrl, name);
+                document.querySelectorAll('.game-card').forEach(c => c.classList.remove('active'));
+                card.classList.add('active');
+            } else {
+                alert("游戏文件数据丢失，请重新拖入。");
+            }
+        };
+        
+        // 加载游戏到控制台
+        const loadGameIntoConsole = (url, name) => {
+            stopSnake();
+            DOM.snakeCanvas.style.display = 'none';
+            DOM.gameFrame.style.display = 'block';
+            DOM.gameFrame.src = url;
+            DOM.gameStatusText.innerText = `正在运行: ${name}`;
+        };
+        
+        // 重置游戏视图
+        const resetGameView = () => {
+            DOM.gameFrame.src = '';
+            DOM.gameFrame.style.display = 'none';
+            DOM.snakeCanvas.style.display = 'block';
+            initSnake();
+            DOM.gameStatusText.innerText = "等待游戏卡带插入... (默认屏保: 贪吃蛇)";
+            document.querySelectorAll('.game-card').forEach(c => c.classList.remove('active'));
+        };
+
+        // --- 高级图库处理 ---
+        // 处理图库文件
+        const handleGalleryFiles = (files) => {
+            Array.from(files).forEach(file => {
+                if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'gallery-item';
+                    
+                    let mediaHtml = '';
+                    let isVideo = false;
+                    if (file.type.startsWith('image/')) {
+                        mediaHtml = `<img src="${e.target.result}" alt="作品">`;
+                    } else if (file.type.startsWith('video/')) {
+                        mediaHtml = `<video src="${e.target.result}"></video>`;
+                        isVideo = true;
+                    }
+                    
+                    itemDiv.innerHTML = `
+                        <div class="gallery-media">
+                            ${mediaHtml}
+                        </div>
+                        <div class="gallery-info">
+                            <div class="gallery-title" contenteditable="true">我的作品标题</div>
+                            <div class="gallery-desc" contenteditable="true">在这里输入作品的描述...</div>
+                        </div>
+                    `;
+                    
+                    // 添加点击事件
+                    const mediaElement = itemDiv.querySelector('.gallery-media');
+                    mediaElement.addEventListener('click', () => {
+                        openLightbox(mediaElement, isVideo);
+                    });
+                    
+                    DOM.galleryContainer.insertBefore(itemDiv, DOM.galleryContainer.firstChild);
+                };
+                
+                reader.readAsDataURL(file);
+            });
+        };
+        
+        // --- 灯箱逻辑 ---
+        // 打开灯箱
+        const openLightbox = (element, isVideo) => {
+            const mediaElement = element.querySelector(isVideo ? 'video' : 'img');
+            const mediaSrc = mediaElement.src;
+            
+            let cardTitle = "预览";
+            const galleryInfo = element.parentElement.querySelector('.gallery-title');
+            if (galleryInfo) {
+                cardTitle = galleryInfo.innerText;
+            }
+            
+            DOM.lightbox.style.display = 'flex';
+            setTimeout(() => DOM.lightbox.classList.add('active'), 10);
+            DOM.lightboxCaption.innerText = cardTitle;
+            
+            if (isVideo) {
+                DOM.lightboxImg.style.display = 'none';
+                DOM.lightboxVideo.style.display = 'block';
+                DOM.lightboxVideo.src = mediaSrc;
+                DOM.lightboxVideo.play();
+            } else {
+                DOM.lightboxVideo.style.display = 'none';
+                DOM.lightboxVideo.pause();
+                DOM.lightboxImg.style.display = 'block';
+                DOM.lightboxImg.src = mediaSrc;
+            }
+        };
+        
+        // 关闭灯箱
+        const closeLightbox = (e, force = false) => {
+            if (force || e.target.id === 'lightbox') {
+                DOM.lightbox.classList.remove('active');
+                
+                setTimeout(() => {
+                    DOM.lightbox.style.display = 'none';
+                    DOM.lightboxVideo.pause();
+                    DOM.lightboxVideo.currentTime = 0;
+                }, 300);
+            }
+        };
+        
+        // --- 风格/主题切换 ---
+        const changeTheme = (themeName) => {
+            document.body.setAttribute('data-theme', themeName);
+        };
+
+        // --- 游戏逻辑 (屏保贪吃蛇) ---
+        const ctx = DOM.snakeCanvas.getContext('2d');
+        const box = 20; 
+        let snake = [];
+        let food = {};
+        let gameConfig = { snakeColor: "#4ade80", foodColor: "#ef4444", speed: 150 };
+
+        // 初始化贪吃蛇游戏
+        const initSnake = () => {
+            // 清除之前的游戏循环
+            if (window.gameLoop) {
+                clearInterval(window.gameLoop);
+                window.gameLoop = null;
+            }
+            
+            snake = [{ x: 10 * box, y: 10 * box }];
+            generateFood();
+            draw();
+            window.gameLoop = setInterval(draw, gameConfig.speed);
+        };
+        
+        // 生成食物
+        const generateFood = () => {
+            food = {
+                x: Math.floor(Math.random() * (DOM.snakeCanvas.width / box)) * box,
+                y: Math.floor(Math.random() * (DOM.snakeCanvas.height / box)) * box
+            };
+        };
+        
+        // 停止贪吃蛇游戏
+        const stopSnake = () => {
+            if (window.gameLoop) {
+                clearInterval(window.gameLoop);
+                window.gameLoop = null;
+            }
+        };
+        
+        // 绘制贪吃蛇游戏
+        const draw = () => {
+            // 清空画布
+            ctx.fillStyle = "#0f172a";
+            ctx.fillRect(0, 0, DOM.snakeCanvas.width, DOM.snakeCanvas.height);
+            
+            // 绘制蛇身
+            snake.forEach(segment => {
+                ctx.fillStyle = gameConfig.snakeColor;
+                ctx.fillRect(segment.x, segment.y, box, box);
+            });
+            
+            // 绘制食物
+            ctx.fillStyle = gameConfig.foodColor;
+            ctx.fillRect(food.x, food.y, box, box);
+            
+            // 移动蛇
+            let snakeX = snake[0].x + box;
+            if (snakeX >= DOM.snakeCanvas.width) {
+                snakeX = 0;
+            }
+            
+            snake.unshift({ x: snakeX, y: snake[0].y });
+            snake.pop();
+        };
+        
+        // --- 导出与跳转功能 ---
+        // 跳转到指定链接
+        const jumpToLink = () => {
+            let url = DOM.linkInput.value.trim();
+            if (!url) {
+                alert("请输入链接");
+                return;
+            }
+            
+            // 补全URL协议
+            if (!/^http(s)?:\/\//i.test(url)) {
+                url = 'http://' + url;
+            }
+            
+            window.open(url, '_blank');
+        };
+        
+        // 导出HTML页面
+        const exportHTML = () => {
+            const docClone = document.documentElement.cloneNode(true);
+            
+            // 移除临时类
+            const dirtyElements = docClone.querySelectorAll('.drag-over, .active');
+            dirtyElements.forEach(el => {
+                el.classList.remove('drag-over', 'active');
+            });
+            
+            // 生成下载链接
+            const htmlContent = docClone.outerHTML;
+            const blob = new Blob([htmlContent], { type: 'text/html' });
+            const downloadLink = document.createElement('a');
+            downloadLink.href = URL.createObjectURL(blob);
+            
+            // 生成文件名
+            const date = new Date();
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            
+            downloadLink.download = `AI 仿生机器人科创营成果展示_${year}${month}${day}_${hours}${minutes}.html`;
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+            
+            alert("网页已保存！\n所有教程内容和图片都已打包带走。");
+        };
+        
+        // --- 初始化功能 ---
+        // 页面加载完成后初始化
+        window.addEventListener('DOMContentLoaded', () => {
+            initDragAndDrop();
+            initSnake();
+            
+            // 添加链接输入框回车事件
+            DOM.linkInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    jumpToLink();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

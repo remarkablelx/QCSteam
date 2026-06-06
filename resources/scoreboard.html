@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>积分统计可视化大屏</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- ECharts -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <!-- SheetJS (用于读取/导出Excel) -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* 自定义样式以增强大屏科技感 */
+        body {
+            background-color: #0b1120;
+            color: #fff;
+            font-family: 'Microsoft YaHei', sans-serif;
+            /* 移动端允许滚动，桌面端固定 */
+            overflow-x: hidden;
+            overflow-y: auto;
+            user-select: none;
+        }
+
+        @media (min-width: 1024px) {
+            body {
+                overflow: hidden;
+            }
+        }
+        
+        /* 玻璃拟态卡片背景 */
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+        }
+
+        /* 滚动条隐藏 */
+        ::-webkit-scrollbar {
+            width: 0px;
+            background: transparent;
+        }
+
+        /* 霓虹文字效果 */
+        .neon-text {
+            text-shadow: 0 0 10px rgba(56, 189, 248, 0.7);
+        }
+
+        /* 表格动画 */
+        .scrolling-table-container {
+            overflow-y: auto;
+            position: relative;
+        }
+        
+        .rank-item {
+            transition: all 0.2s ease;
+            border-left: 3px solid transparent;
+        }
+        .rank-item:hover {
+            background: rgba(56, 189, 248, 0.2);
+            border-left: 3px solid #38bdf8;
+            padding-left: 8px; /* 增加一点位移感 */
+        }
+        .rank-item:active {
+            transform: scale(0.98);
+            background: rgba(56, 189, 248, 0.4);
+        }
+
+        /* 点击时的加分动画 */
+        @keyframes scorePopup {
+            0% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-20px); }
+        }
+        .score-popup {
+            position: absolute;
+            color: #4ade80;
+            font-weight: bold;
+            pointer-events: none;
+            animation: scorePopup 0.8s ease-out forwards;
+            z-index: 50;
+        }
+
+        /* 随机点名名字动画 */
+        #random-name-display {
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.2s;
+        }
+
+        /* 切换按钮样式 */
+        .toggle-btn {
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            padding: 2px;
+            border-radius: 9999px;
+            display: flex;
+            position: relative;
+            cursor: pointer;
+            width: 100%; /* Mobile full width */
+            max-width: 140px;
+        }
+        .toggle-btn-slider {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 50%;
+            height: calc(100% - 4px);
+            background: #0ea5e9;
+            border-radius: 9999px;
+            transition: transform 0.3s ease;
+        }
+        .toggle-btn.active .toggle-btn-slider {
+            transform: translateX(100%);
+        }
+        .toggle-option {
+            flex: 1;
+            text-align: center;
+            z-index: 10;
+            padding: 4px 2px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: #94a3b8;
+            transition: color 0.3s;
+            white-space: nowrap;
+        }
+        .toggle-btn .toggle-option.selected {
+            color: white;
+        }
+
+        /* 状态指示灯 */
+        .sync-status {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+        .sync-active { background-color: #4ade80; box-shadow: 0 0 5px #4ade80; }
+        .sync-inactive { background-color: #94a3b8; }
+        .sync-paused { background-color: #fbbf24; } /* 黄色表示暂停 */
+
+        /* 模态框背景 */
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(5px);
+        }
+    </style>
+</head>
+<body class="min-h-screen w-screen flex flex-col bg-slate-900 text-white">
+
+    <!-- 锁定屏幕遮罩 (观众端) -->
+    <div id="lock-screen" class="fixed inset-0 z-[90] bg-slate-900 flex flex-col items-center justify-center hidden transition-opacity duration-500">
+        <div class="relative">
+            <div class="absolute inset-0 bg-blue-500 blur-xl opacity-20 rounded-full animate-pulse"></div>
+            <i class="fa-solid fa-lock text-6xl text-gray-400 mb-6 relative z-10"></i>
+        </div>
+        <h2 class="text-3xl font-bold text-gray-200 tracking-widest mb-2">大屏展示暂停</h2>
+        <p class="text-gray-500 font-mono text-sm">Waiting for administrator to unlock...</p>
+    </div>
+
+    <!-- 验证模态框 (管理员用) -->
+    <div id="auth-modal" class="fixed inset-0 z-[100] hidden modal-backdrop flex items-center justify-center p-4">
+        <div class="bg-slate-800 border border-slate-600 rounded-xl shadow-2xl w-full max-w-sm p-6 transform transition-all scale-100">
+            <div class="text-center mb-6">
+                <i class="fa-solid fa-user-shield text-4xl text-blue-500 mb-2"></i>
+                <h3 id="auth-title" class="text-xl font-bold">管理员验证</h3>
+                <p id="auth-subtitle" class="text-gray-400 text-sm mt-1">请输入管理密码</p>
+            </div>
+            
+            <input type="password" id="auth-input" placeholder="Password" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-3 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none mb-4 text-center tracking-widest text-lg">
+            
+            <div class="flex gap-3">
+                <button id="auth-cancel-btn" onclick="closeAuthModal()" class="flex-1 bg-gray-700 hover:bg-gray-600 py-2 rounded-lg text-sm transition hidden">取消</button>
+                <button onclick="submitAuth()" class="flex-1 bg-blue-600 hover:bg-blue-500 py-2 rounded-lg text-sm font-bold shadow-lg shadow-blue-500/30 transition">确认</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 头部 -->
+    <header class="flex flex-col lg:flex-row lg:h-16 items-center justify-between px-4 py-3 lg:py-0 border-b border-slate-700 bg-slate-800/50 relative z-10 gap-3">
+        <div class="flex items-center gap-3 w-full lg:w-auto justify-between lg:justify-start">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-chart-line text-cyan-400 text-xl lg:text-2xl"></i>
+                <h1 class="text-lg lg:text-2xl font-bold tracking-wider neon-text truncate">积分监控中心</h1>
+            </div>
+            
+            <!-- 同步状态标签 (移动端放在标题旁) -->
+            <div id="sync-badge" class="text-[10px] lg:text-xs border border-gray-600 rounded px-2 py-1 bg-black/30 text-gray-400 hidden flex items-center">
+                <span class="sync-status sync-inactive" id="sync-light"></span>
+                <span id="sync-text">未连接</span>
+            </div>
+        </div>
+        
+        <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto justify-end">
+            <!-- 当前时间 -->
+            <div id="clock" class="text-sm lg:text-xl font-mono text-cyan-300 hidden sm:block">00:00:00</div>
+            
+            <!-- 角色切换开关 -->
+             <div class="flex items-center gap-2">
+                <div class="toggle-btn" onclick="handleAdminToggle()" id="adminModeToggle">
+                    <div class="toggle-btn-slider"></div>
+                    <div class="toggle-option selected" id="opt-viewer">观众</div>
+                    <div class="toggle-option" id="opt-admin">管理</div>
+                </div>
+            </div>
+
+            <!-- 操作按钮组 (仅管理员可见) -->
+            <div class="flex gap-2 hidden" id="admin-controls">
+                <!-- 一键锁屏按钮 -->
+                <button onclick="toggleLock()" id="lockBtn" class="bg-gray-700 hover:bg-gray-600 text-gray-300 w-8 h-8 rounded flex items-center justify-center shadow transition text-xs border border-gray-600" title="一键锁屏/解锁">
+                    <i class="fa-solid fa-lock-open"></i>
+                </button>
+
+                <div class="relative group">
+                    <label for="fileInput" class="cursor-pointer bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded shadow transition flex items-center gap-1 text-xs">
+                        <i class="fa-solid fa-upload"></i> <span class="hidden sm:inline">导入</span>
+                    </label>
+                    <input type="file" id="fileInput" accept=".xlsx, .xls" class="hidden" onchange="handleFile(this)">
+                </div>
+
+                <button onclick="exportData()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded shadow transition text-xs flex items-center gap-1">
+                    <i class="fa-solid fa-download"></i> <span class="hidden sm:inline">导出</span>
+                </button>
+                
+                <button onclick="clearData()" class="bg-red-600 hover:bg-red-500 text-white w-8 h-8 rounded shadow transition text-xs flex items-center justify-center">
+                   <i class="fa-solid fa-trash"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主内容区 -->
+    <main class="flex-1 p-3 lg:p-4 gap-3 lg:gap-4 grid grid-cols-1 lg:grid-cols-12 lg:h-[calc(100vh-4rem)]">
+        
+        <!-- 左侧列 (移动端堆叠，桌面端 3/12) -->
+        <div class="col-span-1 lg:col-span-3 flex flex-row lg:flex-col gap-3 overflow-x-auto lg:overflow-visible pb-1 lg:pb-0">
+            <!-- 关键指标卡片 (移动端横向排列) -->
+            <div class="glass-card rounded-xl p-3 lg:p-4 flex-1 flex flex-col justify-center items-center min-w-[100px]">
+                <h3 class="text-gray-400 text-[10px] lg:text-sm uppercase tracking-widest mb-1 lg:mb-2">参与人数</h3>
+                <div class="text-2xl lg:text-5xl font-bold text-blue-400" id="total-users">0</div>
+            </div>
+            
+            <div class="glass-card rounded-xl p-3 lg:p-4 flex-1 flex flex-col justify-center items-center min-w-[100px]">
+                <h3 class="text-gray-400 text-[10px] lg:text-sm uppercase tracking-widest mb-1 lg:mb-2">总积分池</h3>
+                <div class="text-2xl lg:text-5xl font-bold text-purple-400" id="total-points">0</div>
+            </div>
+
+            <div class="glass-card rounded-xl p-3 lg:p-4 flex-1 flex flex-col justify-center items-center min-w-[100px]">
+                <h3 class="text-gray-400 text-[10px] lg:text-sm uppercase tracking-widest mb-1 lg:mb-2">最高分</h3>
+                <div class="text-lg lg:text-3xl font-bold text-yellow-400 truncate w-full text-center" id="top-player">-</div>
+                <div class="text-[10px] lg:text-sm text-yellow-600 mt-1" id="top-score">0</div>
+            </div>
+        </div>
+
+        <!-- 中间列 (桌面端 6/12) -->
+        <div class="col-span-1 lg:col-span-6 flex flex-col gap-3 lg:gap-4 min-h-[400px] lg:min-h-0">
+            <!-- 主柱状图 -->
+            <div class="glass-card rounded-xl p-2 lg:p-4 flex-[2] relative min-h-[250px]">
+                <div class="absolute top-2 left-4 text-sm lg:text-lg font-bold border-l-4 border-cyan-500 pl-2" id="chart-title">积分排名 Top 10</div>
+                <div id="barChart" class="w-full h-full pt-6"></div>
+            </div>
+
+            <!-- 随机点名 (所有人可见，按钮状态不同) -->
+            <div id="random-call-card" class="glass-card rounded-xl p-4 flex-1 relative flex flex-col overflow-hidden min-h-[150px]">
+                <div class="absolute top-2 left-4 text-sm lg:text-lg font-bold border-l-4 border-purple-500 pl-2">随机点名</div>
+                
+                <div class="absolute inset-0 bg-gradient-to-r from-purple-900/20 to-blue-900/20 pointer-events-none"></div>
+
+                <div class="flex-1 flex flex-col justify-center items-center gap-4 lg:gap-6 mt-4 z-10">
+                    <div id="random-name-display" class="text-3xl lg:text-5xl font-bold text-yellow-400 tracking-wider drop-shadow-lg text-center truncate w-full px-4">
+                        准备就绪
+                    </div>
+                    <button onclick="toggleRandomCall()" id="randomBtn" class="bg-gray-600 text-white px-6 py-2 lg:px-8 lg:py-3 rounded-full shadow-lg transition transform text-sm lg:text-xl font-bold flex items-center gap-2 border border-gray-400/50 cursor-not-allowed opacity-50">
+                        <i class="fa-solid fa-dice"></i> <span id="randomBtnText">等待点名</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右侧列 (桌面端 3/12) -->
+        <div class="col-span-1 lg:col-span-3 flex flex-col gap-4 h-[500px] lg:h-auto">
+            <!-- 实时列表 -->
+            <div class="glass-card rounded-xl p-3 lg:p-4 h-full flex flex-col relative">
+                <div class="text-base lg:text-lg font-bold border-l-4 border-green-500 pl-2 mb-3 lg:mb-4 flex justify-between items-center">
+                    <span>实时排行榜</span>
+                    
+                    <!-- 个人/团队切换开关 -->
+                    <div class="toggle-btn" onclick="toggleRankMode()" id="rankModeToggle">
+                        <div class="toggle-btn-slider"></div>
+                        <div class="toggle-option selected" id="opt-individual">个人</div>
+                        <div class="toggle-option" id="opt-team">团队</div>
+                    </div>
+                </div>
+                
+                <!-- 操作提示 -->
+                <div id="click-hint" class="text-[10px] lg:text-xs text-green-400 mb-2 flex items-center gap-2">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <span>点击个人名字可增加积分</span>
+                </div>
+
+                <!-- 表头 -->
+                <div class="grid grid-cols-4 text-gray-400 text-xs lg:text-sm border-b border-gray-700 pb-2 mb-2 pr-2">
+                    <div class="text-center">排名</div>
+                    <div class="col-span-2" id="list-header-name">名字</div>
+                    <div class="text-right">积分</div>
+                </div>
+
+                <!-- 滚动列表容器 -->
+                <div class="flex-1 overflow-y-auto scrolling-table-container" id="ranking-list">
+                    <!-- 列表项将通过 JS 插入 -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // --- 1. 全局配置与状态 ---
+        let charts = {};
+        // config 包含锁屏状态和随机点名状态
+        let globalData = { 
+            users: [], 
+            config: { 
+                isLocked: false,
+                randomCall: { isRolling: false, name: "准备就绪" }
+            } 
+        }; 
+        let isTeamView = false; 
+        
+        // 密码相关
+        let adminPassword = "123"; // 管理员初始密码
+        let isAuthModalOpen = false; 
+        
+        // 模式控制
+        let isAdmin = false; 
+        let syncTimer = null; // Changed from syncInterval to syncTimer
+        const API_GET = '/api/data';
+        const API_SAVE = '/api/save';
+
+        let isRolling = false;
+        let rollInterval = null;
+
+        let authCallback = null; 
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            charts.bar = echarts.init(document.getElementById('barChart'));
+            window.addEventListener('resize', () => charts.bar.resize());
+            setInterval(updateClock, 1000);
+            updateClock();
+            
+            // 默认观众状态初始化UI
+            toggleAdminMode(false);
+        });
+
+        // --- 2. 认证与锁屏系统 ---
+
+        function openAuthModal(title, subtitle, allowCancel, callback) {
+            isAuthModalOpen = true; 
+            const modal = document.getElementById('auth-modal');
+            const cancelBtn = document.getElementById('auth-cancel-btn');
+            
+            document.getElementById('auth-title').innerText = title || "请输入密码";
+            document.getElementById('auth-subtitle').innerText = subtitle || "";
+            document.getElementById('auth-input').value = "";
+            
+            if (allowCancel) {
+                cancelBtn.classList.remove('hidden');
+            } else {
+                cancelBtn.classList.add('hidden');
+            }
+            
+            authCallback = callback;
+            modal.classList.remove('hidden');
+            document.getElementById('auth-input').focus();
+        }
+
+        function closeAuthModal() {
+            document.getElementById('auth-modal').classList.add('hidden');
+            isAuthModalOpen = false; 
+            authCallback = null;
+        }
+
+        function submitAuth() {
+            const input = document.getElementById('auth-input').value;
+            if (authCallback) {
+                authCallback(input);
+            }
+        }
+        
+        document.getElementById('auth-input').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') submitAuth();
+        });
+
+        function handleAdminToggle() {
+            if (isAdmin) {
+                toggleAdminMode(false);
+            } else {
+                openAuthModal("管理员验证", "需要密码", true, (password) => {
+                    if (password === adminPassword) {
+                        closeAuthModal();
+                        toggleAdminMode(true);
+                    } else {
+                        alert("密码错误！");
+                        document.getElementById('auth-input').value = "";
+                        document.getElementById('auth-input').focus();
+                    }
+                });
+            }
+        }
+
+        function toggleLock() {
+            if (!isAdmin) return;
+            
+            if (!globalData.config) globalData.config = { isLocked: false, randomCall: { isRolling: false, name: "准备就绪" } };
+            globalData.config.isLocked = !globalData.config.isLocked;
+            
+            updateLockBtnState();
+            uploadDataToServer(); 
+        }
+        
+        function updateLockBtnState() {
+            const btn = document.getElementById('lockBtn');
+            const isLocked = globalData.config && globalData.config.isLocked;
+            
+            if (isLocked) {
+                btn.innerHTML = '<i class="fa-solid fa-lock"></i>';
+                btn.classList.add('text-red-400', 'border-red-500');
+                btn.classList.remove('text-gray-300', 'border-gray-600');
+                btn.title = "大屏已锁定 (点击解锁)";
+            } else {
+                btn.innerHTML = '<i class="fa-solid fa-lock-open"></i>';
+                btn.classList.remove('text-red-400', 'border-red-500');
+                btn.classList.add('text-gray-300', 'border-gray-600');
+                btn.title = "大屏未锁定 (点击锁定)";
+            }
+        }
+
+        // --- 3. 网络同步与数据处理 (优化版：防阻塞) ---
+
+        function startSyncLoop() {
+            document.getElementById('sync-badge').classList.remove('hidden');
+            document.getElementById('sync-text').innerText = "连接中...";
+            
+            // 如果已经在运行，先停掉
+            if (syncTimer) clearTimeout(syncTimer);
+            
+            // 立即执行一次
+            fetchDataFromServer();
+        }
+
+        function stopSyncLoop() {
+            if (syncTimer) clearTimeout(syncTimer);
+            syncTimer = null;
+            document.getElementById('sync-badge').classList.add('hidden');
+        }
+
+        async function fetchDataFromServer() {
+            // 如果正在输入密码，暂停同步
+            if (isAuthModalOpen) {
+                document.getElementById('sync-light').classList.remove('sync-active');
+                document.getElementById('sync-light').classList.add('sync-paused');
+                document.getElementById('sync-text').innerText = "输入中...";
+                // 1秒后再试
+                syncTimer = setTimeout(fetchDataFromServer, 1000);
+                return; 
+            }
+
+            try {
+                // 增加时间戳防止缓存 (?t=123456789)
+                const response = await fetch(`${API_GET}?t=${Date.now()}`);
+                
+                if (response.ok) {
+                    let rawData = await response.json();
+                    
+                    let normalizedData = { users: [], config: { isLocked: false, randomCall: { isRolling: false, name: "准备就绪" } } };
+                    
+                    if (Array.isArray(rawData)) {
+                        normalizedData.users = rawData;
+                    } else if (rawData.users) {
+                        normalizedData = rawData;
+                        if (!normalizedData.config) normalizedData.config = { isLocked: false };
+                        if (!normalizedData.config.randomCall) normalizedData.config.randomCall = { isRolling: false, name: "准备就绪" };
+                    }
+
+                    // 处理锁屏
+                    const lockScreen = document.getElementById('lock-screen');
+                    if (normalizedData.config.isLocked && !isAdmin) {
+                        lockScreen.classList.remove('hidden');
+                    } else {
+                        lockScreen.classList.add('hidden');
+                    }
+
+                    globalData = normalizedData;
+                    updateDashboard(globalData.users);
+                    
+                    // 同步随机点名逻辑
+                    if (!isAdmin) {
+                        const serverRandom = globalData.config.randomCall;
+                        if (serverRandom.isRolling) {
+                            if (!isRolling) startRollingUI(); 
+                        } else {
+                            if (isRolling) stopRollingUI(); 
+                            document.getElementById('random-name-display').innerText = serverRandom.name;
+                        }
+                    }
+                    
+                    if (isAdmin) updateLockBtnState();
+
+                    document.getElementById('sync-light').classList.add('sync-active');
+                    document.getElementById('sync-light').classList.remove('sync-inactive');
+                    document.getElementById('sync-light').classList.remove('sync-paused');
+                    document.getElementById('sync-text').innerText = "已连接";
+                }
+            } catch (error) {
+                // 失败时
+                document.getElementById('sync-light').classList.remove('sync-active');
+                document.getElementById('sync-light').classList.add('sync-inactive');
+                document.getElementById('sync-text').innerText = "重连中";
+                console.warn("同步失败:", error);
+            } finally {
+                // 关键修改：无论成功失败，都在当前请求结束后，再等1秒发起下一次请求
+                // 这样避免了网络卡顿时的请求堆积
+                if (!isAdmin) {
+                    syncTimer = setTimeout(fetchDataFromServer, 1000);
+                }
+            }
+        }
+
+        async function uploadDataToServer() {
+            if (!isAdmin) return;
+            try {
+                const response = await fetch(API_SAVE, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(globalData)
+                });
+            } catch (error) {
+                alert("同步失败：无法连接服务器");
+            }
+        }
+
+        // --- 4. 模式切换 UI ---
+
+        function toggleAdminMode(enable) {
+            isAdmin = enable;
+            const btn = document.getElementById('adminModeToggle');
+            const optViewer = document.getElementById('opt-viewer');
+            const optAdmin = document.getElementById('opt-admin');
+            const adminControls = document.getElementById('admin-controls');
+            const lockScreen = document.getElementById('lock-screen');
+            const randomBtn = document.getElementById('randomBtn');
+            const randomBtnText = document.getElementById('randomBtnText');
+
+            if (isAdmin) {
+                // Admin Mode
+                btn.classList.add('active');
+                optViewer.classList.remove('selected');
+                optAdmin.classList.add('selected');
+                
+                adminControls.classList.remove('hidden'); 
+                lockScreen.classList.add('hidden'); 
+                
+                stopSyncLoop(); // 管理员不需要轮询获取，因为数据是本地产生并推送到服务器的
+                
+                // 但为了确保管理员刚切换过来时数据是最新的，获取一次
+                fetch(`${API_GET}?t=${Date.now()}`).then(r=>r.json()).then(d => {
+                     if(d.users) globalData = d;
+                     else globalData.users = d;
+                     updateDashboard(globalData.users);
+                });
+                
+                randomBtn.onclick = toggleRandomCall;
+                randomBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-gray-600');
+                randomBtn.classList.add('bg-purple-600', 'hover:bg-purple-500', 'cursor-pointer');
+                if (isRolling) {
+                    randomBtn.classList.replace('bg-purple-600', 'bg-pink-600');
+                    randomBtn.classList.replace('hover:bg-purple-500', 'hover:bg-pink-500');
+                    randomBtn.innerHTML = '<i class="fa-solid fa-stop"></i> 停止';
+                } else {
+                    randomBtn.innerHTML = '<i class="fa-solid fa-dice"></i> <span id="randomBtnText">开始点名</span>';
+                }
+
+            } else {
+                // Viewer Mode
+                btn.classList.remove('active');
+                optViewer.classList.add('selected');
+                optAdmin.classList.remove('selected');
+                
+                adminControls.classList.add('hidden');
+                
+                startSyncLoop(); // 观众模式开启轮询
+                
+                randomBtn.onclick = null;
+                randomBtn.classList.add('opacity-50', 'cursor-not-allowed', 'bg-gray-600');
+                randomBtn.classList.remove('bg-purple-600', 'hover:bg-purple-500', 'cursor-pointer', 'bg-pink-600', 'hover:bg-pink-500');
+                if(isRolling) {
+                     document.getElementById('randomBtnText').innerText = "管理员点名中...";
+                } else {
+                     randomBtn.innerHTML = '<i class="fa-solid fa-dice"></i> <span id="randomBtnText">等待点名</span>';
+                }
+            }
+            updateRankList(globalData.users);
+            updateLockBtnState();
+            setTimeout(() => charts.bar.resize(), 50);
+        }
+
+        // --- 5. 业务逻辑 (导入/加分/显示) ---
+
+        function handleFile(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, {type: 'array'});
+                const firstSheetName = workbook.SheetNames[0];
+                const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheetName]);
+                const processedData = processExcelData(jsonData);
+                
+                if (processedData.length > 0) {
+                    globalData.users = processedData;
+                    updateDashboard(globalData.users);
+                    uploadDataToServer();
+                    alert(`成功加载 ${processedData.length} 条数据！`);
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function processExcelData(jsonData) {
+            if (jsonData.length === 0) return [];
+            const keys = Object.keys(jsonData[0]);
+            
+            const nameKey = keys.find(k => k.includes('名') && !k.includes('队') && !k.includes('Team') || k.toLowerCase() === 'name');
+            const scoreKey = keys.find(k => (k.includes('积分') || k.includes('分')) && !k.includes('队') && !k.includes('Team') || k.toLowerCase() === 'score');
+            const teamKey = keys.find(k => k.includes('队') || k.toLowerCase().includes('team') || k.includes('组'));
+            const teamScoreKey = keys.find(k => (k.includes('队') || k.toLowerCase().includes('team')) && (k.includes('分') || k.toLowerCase().includes('score') || k.includes('integral')));
+            
+            if (!nameKey || !scoreKey) return [];
+
+            let parsedData = jsonData.map(row => {
+                const teamName = teamKey ? (row[teamKey] || '无团队') : '无团队';
+                let teamScoreVal = (teamScoreKey && row[teamScoreKey] !== undefined) ? parseFloat(row[teamScoreKey]) : -1;
+
+                return {
+                    name: row[nameKey] || '未知',
+                    value: parseFloat(row[scoreKey]) || 0,
+                    team: teamName,
+                    teamScore: teamScoreVal 
+                };
+            });
+
+            const teamScoresMap = {};
+            parsedData.forEach(item => {
+                if (!teamScoresMap[item.team]) teamScoresMap[item.team] = { manualSum: 0, excelScore: -1 };
+                teamScoresMap[item.team].manualSum += item.value;
+                if (item.teamScore > teamScoresMap[item.team].excelScore) teamScoresMap[item.team].excelScore = item.teamScore;
+            });
+
+            parsedData.forEach(item => {
+                const tInfo = teamScoresMap[item.team];
+                if (tInfo.excelScore >= 0) item.teamScore = tInfo.excelScore;
+                else item.teamScore = tInfo.manualSum;
+            });
+
+            return parsedData.sort((a, b) => b.value - a.value);
+        }
+
+        function clearData() {
+            if(confirm("确定要清空所有数据吗？")) {
+                globalData.users = [];
+                updateDashboard([]);
+                uploadDataToServer();
+            }
+        }
+
+        function adjustScore(name, delta, event) {
+            if (!isAdmin) return; 
+            if (isTeamView) return; 
+
+            const userIndex = globalData.users.findIndex(item => item.name === name);
+            if (userIndex !== -1) {
+                globalData.users[userIndex].value += delta;
+                globalData.users.sort((a, b) => b.value - a.value); 
+                
+                updateDashboard(globalData.users); 
+                uploadDataToServer(); 
+                showScorePopup(event.clientX, event.clientY, delta);
+            }
+        }
+
+        function adjustTeamScore(teamName, delta, event) {
+            if (!isAdmin) return; 
+
+            let updated = false;
+            globalData.users.forEach(item => {
+                if (item.team === teamName) {
+                    item.teamScore += delta;
+                    updated = true;
+                }
+            });
+
+            if (updated) {
+                updateDashboard(globalData.users);
+                uploadDataToServer(); 
+                showScorePopup(event.clientX, event.clientY, delta);
+            }
+        }
+
+        function showScorePopup(x, y, val) {
+            const popup = document.createElement('div');
+            popup.innerText = val > 0 ? `+${val}` : val;
+            popup.className = 'score-popup text-xl';
+            popup.style.left = `${x}px`;
+            popup.style.top = `${y - 20}px`; 
+            document.body.appendChild(popup);
+            setTimeout(() => popup.remove(), 800);
+        }
+
+        // --- 随机点名核心逻辑 ---
+
+        function toggleRandomCall() {
+            if (!isAdmin || globalData.users.length === 0) return;
+
+            if (!isRolling) {
+                // 开始点名
+                startRollingUI();
+                // 同步状态：正在点名
+                if (!globalData.config) globalData.config = {};
+                globalData.config.randomCall = { isRolling: true, name: "正在点名..." };
+                uploadDataToServer();
+            } else {
+                // 停止点名
+                stopRollingUI();
+                // 同步状态：停止，并传入当前显示的名字
+                const selectedName = document.getElementById('random-name-display').innerText;
+                globalData.config.randomCall = { isRolling: false, name: selectedName };
+                uploadDataToServer();
+            }
+        }
+
+        // 抽离：开始滚动的UI表现
+        function startRollingUI() {
+            const btn = document.getElementById('randomBtn');
+            const display = document.getElementById('random-name-display');
+            const btnText = document.getElementById('randomBtnText');
+
+            isRolling = true;
+            
+            // UI Update
+            if(isAdmin) {
+                 btn.classList.replace('bg-purple-600', 'bg-pink-600');
+                 btn.classList.replace('hover:bg-purple-500', 'hover:bg-pink-500');
+                 btn.innerHTML = '<i class="fa-solid fa-stop"></i> 停止';
+            } else {
+                 btnText.innerText = "管理员点名中...";
+            }
+            
+            display.classList.remove('scale-125', 'text-green-400');
+            display.classList.add('text-yellow-400');
+
+            if (rollInterval) clearInterval(rollInterval);
+            rollInterval = setInterval(() => {
+                if(globalData.users.length > 0) {
+                    const randomIdx = Math.floor(Math.random() * globalData.users.length);
+                    display.innerText = globalData.users[randomIdx].name;
+                }
+            }, 50);
+        }
+
+        // 抽离：停止滚动的UI表现
+        function stopRollingUI() {
+            const btn = document.getElementById('randomBtn');
+            const display = document.getElementById('random-name-display');
+            const btnText = document.getElementById('randomBtnText');
+
+            isRolling = false;
+            clearInterval(rollInterval);
+
+            if(isAdmin) {
+                btn.classList.replace('bg-pink-600', 'bg-purple-600');
+                btn.classList.replace('hover:bg-pink-500', 'hover:bg-purple-500');
+                btn.innerHTML = '<i class="fa-solid fa-dice"></i> <span id="randomBtnText">开始点名</span>';
+            } else {
+                if(btnText) btnText.innerText = "等待点名";
+            }
+
+            display.classList.remove('text-yellow-400');
+            display.classList.add('scale-125', 'text-green-400');
+        }
+
+        function toggleRankMode() {
+            isTeamView = !isTeamView;
+            
+            const btn = document.getElementById('rankModeToggle');
+            const optInd = document.getElementById('opt-individual');
+            const optTeam = document.getElementById('opt-team');
+            const headerName = document.getElementById('list-header-name');
+            const hint = document.getElementById('click-hint');
+            const chartTitle = document.getElementById('chart-title');
+
+            if (isTeamView) {
+                btn.classList.add('active');
+                optInd.classList.remove('selected');
+                optTeam.classList.add('selected');
+                headerName.innerText = "团队名称";
+                chartTitle.innerText = "团队积分排名 Top 10"; 
+                hint.innerHTML = '<i class="fa-solid fa-users"></i> <span>点击团队名称可增加团队积分（不影响个人）</span>';
+                hint.className = 'text-[10px] lg:text-xs text-purple-400 mb-2 flex items-center gap-2';
+            } else {
+                btn.classList.remove('active');
+                optInd.classList.add('selected');
+                optTeam.classList.remove('selected');
+                headerName.innerText = "名字";
+                chartTitle.innerText = "个人积分排名 Top 10"; 
+                hint.innerHTML = '<i class="fa-solid fa-circle-info"></i> <span>点击个人名字可增加个人积分（不影响团队）</span>';
+                hint.className = 'text-[10px] lg:text-xs text-green-400 mb-2 flex items-center gap-2';
+            }
+
+            updateBarChart(globalData.users);
+            updateRankList(globalData.users);
+        }
+
+        function exportData() {
+            if (globalData.users.length === 0) return;
+            const ws = XLSX.utils.json_to_sheet(globalData.users.map(item => ({ 
+                "名字": item.name, 
+                "积分": item.value, 
+                "团队": item.team, 
+                "队伍积分": item.teamScore 
+            })));
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+            const date = new Date().toISOString().slice(0,10);
+            XLSX.writeFile(wb, `积分统计_更新版_${date}.xlsx`);
+        }
+
+        // --- 渲染逻辑 ---
+
+        function updateDashboard(data) {
+            const totalPoints = data.reduce((sum, item) => sum + item.value, 0);
+            const topPlayer = data.length > 0 ? data[0] : {name: '-', value: 0};
+
+            animateValue('total-users', parseInt(document.getElementById('total-users').innerText), data.length, 500);
+            animateValue('total-points', parseInt(document.getElementById('total-points').innerText), totalPoints, 500);
+            
+            document.getElementById('top-player').innerText = topPlayer.name;
+            document.getElementById('top-score').innerText = topPlayer.value;
+
+            updateBarChart(data);
+            updateRankList(data);
+        }
+
+        function updateBarChart(data) {
+            let displayData = isTeamView ? getTeamData(data) : data;
+            const top10 = displayData.slice(0, 10);
+            
+            const option = {
+                tooltip: { trigger: 'axis' },
+                grid: { top: '15%', bottom: '5%', left: '2%', right: '2%', containLabel: true },
+                xAxis: {
+                    type: 'category',
+                    data: top10.map(i => i.name),
+                    axisLabel: { 
+                        color: '#94a3b8', 
+                        interval: 0, 
+                        rotate: 30,
+                        fontSize: window.innerWidth < 768 ? 10 : 12 
+                    },
+                    axisLine: { lineStyle: { color: '#334155' } }
+                },
+                yAxis: {
+                    type: 'value',
+                    splitLine: { lineStyle: { color: '#334155', type: 'dashed' } },
+                    axisLabel: { color: '#94a3b8' }
+                },
+                series: [{
+                    data: top10.map(i => i.value),
+                    type: 'bar',
+                    itemStyle: {
+                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                            { offset: 0, color: isTeamView ? '#8b5cf6' : '#06b6d4' }, 
+                            { offset: 1, color: isTeamView ? '#ec4899' : '#3b82f6' }
+                        ]),
+                        borderRadius: [4, 4, 0, 0]
+                    },
+                    barWidth: '40%',
+                    showBackground: true,
+                    backgroundStyle: { color: 'rgba(180, 180, 180, 0.1)' }
+                }]
+            };
+            
+            charts.bar.setOption(option);
+        }
+
+        function getTeamData(data) {
+            const teams = {};
+            data.forEach(item => {
+                const tName = item.team || '无团队';
+                if (!teams[tName]) teams[tName] = { name: tName, value: item.teamScore, count: 0 };
+                teams[tName].count += 1;
+                teams[tName].value = Math.max(teams[tName].value, item.teamScore);
+            });
+            return Object.values(teams).sort((a, b) => b.value - a.value);
+        }
+
+        function updateRankList(data) {
+            const container = document.getElementById('ranking-list');
+            container.innerHTML = ''; 
+
+            let displayData = isTeamView ? getTeamData(data) : data;
+
+            displayData.forEach((item, index) => {
+                const rank = index + 1;
+                let rankColor = 'text-gray-400';
+                let icon = '';
+                
+                if (rank === 1) { rankColor = 'text-yellow-400'; icon = '<i class="fa-solid fa-crown"></i>'; }
+                else if (rank === 2) { rankColor = 'text-gray-300'; }
+                else if (rank === 3) { rankColor = 'text-orange-400'; }
+
+                const div = document.createElement('div');
+                const hoverClass = isAdmin ? 'active:bg-slate-700' : ''; // Mobile touch active
+                const cursorClass = isAdmin ? 'cursor-pointer' : 'cursor-default';
+                
+                div.className = `rank-item grid grid-cols-4 text-xs lg:text-sm py-3 border-b border-gray-800 ${cursorClass} ${hoverClass}`;
+                
+                if (isAdmin) {
+                    if (isTeamView) div.onclick = (e) => adjustTeamScore(item.name, 1, e);
+                    else div.onclick = (e) => adjustScore(item.name, 1, e);
+                }
+
+                let nameHtml = item.name;
+                if (!isTeamView) {
+                    nameHtml = `
+                        <div class="flex flex-col">
+                            <span class="flex items-center gap-2">
+                                ${item.name}
+                                ${isAdmin ? '<i class="fa-solid fa-circle-plus text-green-500 text-[10px] opacity-70"></i>' : ''}
+                            </span>
+                            <span class="text-[10px] text-gray-500">${item.team}</span>
+                        </div>
+                    `;
+                } else {
+                    nameHtml = `
+                        <div class="flex flex-col">
+                            <span class="flex items-center gap-2">
+                                <span class="font-bold text-blue-300">${item.name}</span>
+                                ${isAdmin ? '<i class="fa-solid fa-circle-plus text-purple-500 text-[10px] opacity-70"></i>' : ''}
+                            </span>
+                            <span class="text-[10px] text-gray-500">(${item.count}人)</span>
+                        </div>
+                    `;
+                }
+
+                div.innerHTML = `
+                    <div class="text-center font-bold ${rankColor}">${icon} ${rank}</div>
+                    <div class="col-span-2 truncate text-gray-200 flex items-center">
+                        ${nameHtml}
+                    </div>
+                    <div class="text-right font-mono text-cyan-400 font-bold pr-2 transition-all">${item.value}</div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').innerText = now.toLocaleTimeString('zh-CN', { hour12: false });
+        }
+
+        function animateValue(id, start, end, duration) {
+            if (start === end) return;
+            const obj = document.getElementById(id);
+            const range = end - start;
+            let current = start;
+            const increment = end > start ? 1 : -1;
+            const stepTime = Math.abs(Math.floor(duration / range));
+            const timer = setInterval(function() {
+                current += increment;
+                obj.innerHTML = current;
+                if (current == end) clearInterval(timer);
+            }, Math.max(stepTime, 10));
+            if (Math.abs(range) > 100) { clearInterval(timer); obj.innerHTML = end; }
+        }
+    </script>
+</body>
+</html>
